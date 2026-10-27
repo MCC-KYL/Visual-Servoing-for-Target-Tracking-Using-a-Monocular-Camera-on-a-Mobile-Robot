@@ -26,6 +26,19 @@ The misspelling `trajecotry.m` is intentional in the current files: use that exa
 
 The scripts use the Webots MATLAB API functions `wb_*`. Opening a script in MATLAB alone does not run the simulation.
 
+## World and target texture
+
+- [`Camera_testing.wbt`](./Camera_testing.wbt) is the supplied Webots world. Open it from Webots before assigning or running the MATLAB controllers.
+- The world uses a 3 m × 3 m `RectangleArena`, a 16 ms `basicTimeStep`, and a 104 × 78-pixel camera on `bot`. The arena walls are 0.05 m high.
+- `bot` is currently assigned the `ibvs_testing` controller in the world. `tarbot` has no controller selected, and the final supervisor `Robot` is assigned `block_mover`.
+- `bot`, `tarbot`, and the target use the DEF names `bot`, `tarbot`, and `target`. The target is a 0.15 m × 0.15 m × 0.15 m box at 0.075 m above the arena floor.
+- [`Block Texture.png`](./Block%20Texture.png) is the texture applied to both the visible surface and emissive surface of the target. The current `Camera_testing.wbt` references it with `../textures/Block Texture.png`. If the world file is kept directly in this folder, this relative path requires a sibling `textures/` directory containing the image; or the world URL must be updated to `../Block Texture.png` or another valid relative path.
+- The texture supplies strong, trackable image features. Replacing or repositioning it can change initial Harris corner detection and later feature matching. Keep the image at a suitable resolution and preserve a clear contrast pattern.
+- A world reset returns the target to its initial 0 m/0 m/0.075 m translation, but controller assignments and output paths must still match the run being performed.
+- The target and arena appearance are independent of the MATLAB controllers. Edit the world appearance only when deliberately changing lighting or feature geometry; then restart Webots and rerun from an initial state.
+
+The controllers do not create or load the world. They expect the supplied node names, devices, geometry, and target appearance to exist in the open world.
+
 ## Running a Simulation
 
 ### Square or approach configuration
