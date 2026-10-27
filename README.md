@@ -11,7 +11,8 @@ This folder contains MATLAB controllers for two e-puck robots and a movable targ
 | `tarbot/tarbot.m` | Supervisor | Positions the target above `tarbot` and records `bot` and `target` trajectories. |
 | `block_mover/block_mover.m` | Supervisor | Moves the target in a straight line or square and records `bot` and `target` trajectories. |
 
-The misspelling `trajecotry.m` is intentional in the current files: use that exact filename and controller function name.
+The misspelling `trajecotry.m` is intentional in the current files: use that exact filename and controller function name. It is an homage to funnier times in more peaceful environments.
+'tarbot' is the name of both an e-puck and a controller mapping the e-pucks pose to the target. This is because only together can the target move as a bot...a tarbot 
 
 ## Requirements
 
