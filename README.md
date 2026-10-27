@@ -76,7 +76,7 @@ The scripts use `ON = 1` and `OFF = 0` booleans. `ibvs_testing.m` calculates the
 | --- | --- |
 | `slip_toggle` | Uses the wheel-kinematic mapping with slip when enabled. |
 | `d_bnd_toggle` | Enables or disables the wheel-speed dead band. Disable it to always send the computed speeds. |
-| `plot_img` | Updates the live camera/feature view. |
+| `plot_img` | Updates the live camera/feature view. It must remain `ON` for the initial detection in the current implementation. |
 | `plot_error` | Saves point error graphs. |
 | `plot_wheel_speeds` | Saves wheel speed and wheel difference graphs. |
 | `plot_points` | Saves the image-plane corner paths. |
@@ -84,7 +84,9 @@ The scripts use `ON = 1` and `OFF = 0` booleans. `ibvs_testing.m` calculates the
 | `norm_e_plot` | Saves the feature-error norm graph. |
 | `plot_loss` | Saves a feature-loss graph. |
 
-Four target corners are initially sorted by position and then tracked with Hungarian matching. If fewer than four strong features are available, the controller records invalid samples and continues until the configured duration is complete.
+Four target corners are initially sorted by position and then tracked with Hungarian matching. The source comments describe dynamic output paths as a possible future improvement. At present, `file_path` is hard-coded and the destination directory must already exist.
+
+During the main loop, Hungarian matching is used to associate detected corners with the previous locations. If fewer than four strong features are available, the controller writes invalid samples and continues until the configured duration is complete. This fallback does not cover the initial capture: the initial Harris detection is inside `if plot_img == ON`, so `plot_img` must remain `ON` or the controller will have no initial `strong` data.
 
 ## Outputs
 
@@ -98,7 +100,9 @@ At the end of a run, `ibvs_testing.m` exports enabled plots using names derived 
 - `point_lossSpeed_0.08_mps.png`
 - `Speed_0.08_mpsIBVS_statistics.csv`
 
-The supervisor controllers export `position_Speed_<speed>_mps.png`. The CSV contains mean and standard-deviation error and Jacobian-condition values for the second half of the run.
+The supervisor controllers export `position_Speed_<speed>_mps.png`. The CSV contains mean and standard-deviation error and Jacobian-condition values for the second half of the run. The source comment records that 4–6 seconds was previously used for square and approach runs; the active code now calculates the second-half interval instead.
+
+The loss-output implementation is currently unreliable: in `plot_loss == ON`, it clears and exports the existing `cond_num` figure instead of the `loss` figure, and therefore will not necessarily save the feature-loss graph under the listed filename. It is not a general Webots problem.
 
 ## Example configuration changes
 
@@ -117,6 +121,20 @@ d_bnd_toggle = OFF;
 ```
 
 Make the same directory and speed available to all participating controllers. `file_path` must point to an existing directory on the machine running MATLAB.
+
+## Comments and code limitations
+
+The source comments identify these current limitations and should be read alongside the README:
+
+- `ibvs_testing.m` says that file output could be made dynamic with directory creation; the README's `file_path` guidance reflects the current hard-coded implementation rather than that proposed improvement.
+- `ibvs_testing.m` uses `Z = 1` in the image Jacobian, despite comments noting that an actual target depth could be used instead.
+- The source marks `needed = 0` and describes the turn/loss-marker plotting as rudimentary. The README therefore recommends leaving it disabled.
+- `ibvs_testing.m` comments that the 4–6-second statistics interval was intended for square and approach runs, but the active code uses the second half of `t` for all paths.
+- `trajecotry.m` retains an explicit note that the cleanup section should write data in the future. This controller does not currently export data or plots.
+- `tarbot.m` and `block_mover.m` explicitly describe the tracked block speed as a shared parameter that must be kept synchronized manually. The README also calls out this requirement.
+- `block_mover.m` does not contain those dynamic-output comments, but the hard-coded path and `file_path` model are consistent with the matching section in `ibvs_testing.m`.
+
+These are source-specific observations. The general Webots tips below are operational guidance and are not claims made by the controller comments.
 
 ## General Webots help tips
 
@@ -146,3 +164,4 @@ For general Webots setup and MATLAB-controller instructions, see the [Webots doc
 ---
 
 This README was created by GitHub Copilot (AI assistant using Copilot SDK in VS Code).
+
