@@ -11,8 +11,8 @@ This folder contains MATLAB controllers for two e-puck robots and a movable targ
 | `tarbot/tarbot.m` | Supervisor | Positions the target above `tarbot` and records `bot` and `target` trajectories. |
 | `block_mover/block_mover.m` | Supervisor | Moves the target in a straight line or square and records `bot` and `target` trajectories. |
 
-The misspelling `trajecotry.m` is intentional (and a reminder of a few funny incidients) in the current files: use that exact filename and controller function name.
-'tarbot' is the name of an e-puck robot and the controller responsible for making target move with the e-puck. They are both named 'tarbot' as they together form a target bot...tar-bot.
+The misspelling `trajecotry.m` is intentional in the current files: use that exact filename and controller function name.
+
 ## Requirements
 
 - Webots with MATLAB selected as a controller language.
@@ -30,12 +30,21 @@ The scripts use the Webots MATLAB API functions `wb_*`. Opening a script in MATL
 
 - [`Camera_testing.wbt`](./Camera_testing.wbt) is the supplied Webots world. Open it from Webots before assigning or running the MATLAB controllers.
 - The world uses a 3 m × 3 m `RectangleArena`, a 16 ms `basicTimeStep`, and a 104 × 78-pixel camera on `bot`. The arena walls are 0.05 m high.
+- `basicTimeStep` is Webots' world-level physics and sensor integration interval. It does not directly determine how often a MATLAB controller calls its API: each controller has a separate `TIME_STEP` value. The supplied controllers use 32 ms (`tarbot.m` and `trajecotry.m`) or 64 ms (`ibvs_testing.m` and `block_mover.m`), so each controller is stepped once every 2 or 4 world steps. Keep each pair in a run aligned: Webots accepts the controller call, but the MATLAB controller samples slower than the world integration. This is a controller sampling interval, not a replacement for `basicTimeStep`.
 - `bot` is currently assigned the `ibvs_testing` controller in the world. `tarbot` has no controller selected, and the final supervisor `Robot` is assigned `block_mover`.
 - `bot`, `tarbot`, and the target use the DEF names `bot`, `tarbot`, and `target`. The target is a 0.15 m × 0.15 m × 0.15 m box at 0.075 m above the arena floor.
 - [`Block Texture.png`](./Block%20Texture.png) is the texture applied to both the visible surface and emissive surface of the target. The current `Camera_testing.wbt` references it with `../textures/Block Texture.png`. If the world file is kept directly in this folder, this relative path requires a sibling `textures/` directory containing the image; or the world URL must be updated to `../Block Texture.png` or another valid relative path.
+
+  ![Block target texture](./Block%20Texture.png)
 - The texture supplies strong, trackable image features. Replacing or repositioning it can change initial Harris corner detection and later feature matching. Keep the image at a suitable resolution and preserve a clear contrast pattern.
 - A world reset returns the target to its initial 0 m/0 m/0.075 m translation, but controller assignments and output paths must still match the run being performed.
 - The target and arena appearance are independent of the MATLAB controllers. Edit the world appearance only when deliberately changing lighting or feature geometry; then restart Webots and rerun from an initial state.
+
+### Supplied environment view
+
+The supplied `world snap shot.png` shows the Webots arena, target, and robots from the viewpoint used for the experiment:
+
+![Camera_testing Webots environment screenshot](./world%20snap%20shot.png)
 
 The controllers do not create or load the world. They expect the supplied node names, devices, geometry, and target appearance to exist in the open world.
 
@@ -71,7 +80,7 @@ Before running a test, open the relevant scripts and check the settings near the
 | Setting | Used by | Purpose |
 | --- | --- | --- |
 | `file_path` | All controllers | Absolute output directory. It must exist and must be updated for the local machine. |
-| `TIME_STEP` | All controllers | Webots step in milliseconds. Keep participating controllers on the same value. |
+| `TIME_STEP` | All controllers | Controller sampling interval passed to `wb_robot_step` and sensor enable calls. It is independent of the world-level `basicTimeStep` (16 ms in the supplied world). Do not confuse it with `dT`, which is just `TIME_STEP / 1000` for MATLAB calculations. |
 | `Block_speed` | `ibvs_testing.m`, `block_mover.m`, `tarbot.m` | Target speed in m/s. Change it manually in every controller participating in a run. |
 | `Block_Length` | `ibvs_testing.m`, `block_mover.m` | Target path length in metres. |
 | `gain` | `ibvs_testing.m` | Scale applied to the IBVS control input. |
@@ -176,4 +185,4 @@ For general Webots setup and MATLAB-controller instructions, see the [Webots doc
 
 ---
 
-This README was created by GitHub Copilot (AI assistant using Copilot SDK in VS Code), and edited by myself. AI is useful for generating these quickly, but doesn't always include the nuanced things we want it to.
+This README was created by GitHub Copilot (AI assistant using Copilot SDK in VS Code).
