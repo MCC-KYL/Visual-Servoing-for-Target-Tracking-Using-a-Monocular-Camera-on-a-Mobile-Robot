@@ -1,0 +1,116 @@
+#VRML_SIM R2025a utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/floors/protos/RectangleArena.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/robots/gctronic/e-puck/protos/E-puck.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/appearances/protos/Asphalt.proto"
+
+WorldInfo {
+  basicTimeStep 16
+}
+Viewpoint {
+  orientation -0.329048061145801 0.6692155748341198 0.6662416137225501 0.9691339886587429
+  position -4.757479043103928 -3.24036134104472 4.610814511949995
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+RectangleArena {
+  floorSize 3 3
+  floorTileSize 1 1
+  floorAppearance Asphalt {
+  }
+  wallHeight 0.05
+}
+DEF bot E-puck {
+  translation -0.5 0 0
+  rotation 0 0 -1 0
+  controller "ibvs_testing"
+  supervisor TRUE
+  camera_width 104
+  camera_height 78
+}
+DEF tarbot E-puck {
+  rotation 0 0 -1 0
+  name "e-puck(1)"
+  controller "<none>"
+  supervisor TRUE
+}
+DEF w1 Solid {
+  translation 1.5 0 0.05
+  children [
+    DEF WALL_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 0 0 0
+        roughness 0.5
+        metalness 0
+      }
+      geometry Box {
+        size 0.02 3 1.4
+      }
+      castShadows FALSE
+    }
+  ]
+  name "wall 1"
+  boundingObject USE WALL_SHAPE
+}
+DEF w2 Solid {
+  translation -1.5 0 0.05
+  children [
+    USE WALL_SHAPE
+  ]
+  name "w2"
+  boundingObject USE WALL_SHAPE
+}
+DEF w3 Solid {
+  translation 0 1.5 0.05
+  rotation 0 0 1 1.5708
+  children [
+    USE WALL_SHAPE
+  ]
+  name "w3"
+  boundingObject USE WALL_SHAPE
+}
+Solid {
+  translation 0 -1.5 0.05
+  rotation 0 0 1 1.5708
+  children [
+    USE WALL_SHAPE
+  ]
+  name "w4"
+  boundingObject USE WALL_SHAPE
+}
+DEF target Solid {
+  translation 0 0 0.075
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0 0 0
+        baseColorMap ImageTexture {
+          url [
+            "../textures/Block Texture.png"
+          ]
+        }
+        metalness 0
+        emissiveColorMap ImageTexture {
+          url [
+            "../textures/Block Texture.png"
+          ]
+        }
+        emissiveIntensity 2
+      }
+      geometry Box {
+        size 0.15 0.15 0.15
+      }
+      castShadows FALSE
+    }
+  ]
+  name "white box"
+}
+Robot {
+  translation 0 0 0.05
+  controller "block_mover"
+  supervisor TRUE
+}
