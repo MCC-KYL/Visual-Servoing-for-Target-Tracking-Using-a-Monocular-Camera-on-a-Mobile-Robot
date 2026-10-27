@@ -100,7 +100,7 @@ At the end of a run, `ibvs_testing.m` exports enabled plots using names derived 
 - `point_lossSpeed_0.08_mps.png`
 - `Speed_0.08_mpsIBVS_statistics.csv`
 
-The supervisor controllers export `position_Speed_<speed>_mps.png`. The CSV contains mean and standard-deviation error and Jacobian-condition values for the second half of the run. The source comment records that 4–6 seconds was previously used for square and approach runs; the active code now calculates the second-half interval instead.
+The supervisor controllers export `position_Speed_<speed>_mps.png`. The CSV contains mean and standard-deviation error and Jacobian-condition values selected by the active `idx` expression. Before the run, choose the appropriate time interval in `ibvs_testing.m`: use `idx = t >= 4 & t <= 6` for square or approach experiments, or use `idx = t >= (max(t)/2) & t <= max(t)` for the line configuration. These are alternative lines of code, not settings that run together.
 
 The loss-output implementation is currently unreliable: in `plot_loss == ON`, it clears and exports the existing `cond_num` figure instead of the `loss` figure, and therefore will not necessarily save the feature-loss graph under the listed filename. It is not a general Webots problem.
 
@@ -129,7 +129,7 @@ The source comments identify these current limitations and should be read alongs
 - `ibvs_testing.m` says that file output could be made dynamic with directory creation; the README's `file_path` guidance reflects the current hard-coded implementation rather than that proposed improvement.
 - `ibvs_testing.m` uses `Z = 1` in the image Jacobian, despite comments noting that an actual target depth could be used instead.
 - The source marks `needed = 0` and describes the turn/loss-marker plotting as rudimentary. The README therefore recommends leaving it disabled.
-- `ibvs_testing.m` comments that the 4–6-second statistics interval was intended for square and approach runs, but the active code uses the second half of `t` for all paths.
+- `ibvs_testing.m` comments that `t >= 4 & t <= 6` is used for square and approach runs, while `t >= (max(t)/2) & t <= max(t)` is an alternative for line runs. Swap these two active `idx` lines depending on the selected configuration.
 - `trajecotry.m` retains an explicit note that the cleanup section should write data in the future. This controller does not currently export data or plots.
 - `tarbot.m` and `block_mover.m` explicitly describe the tracked block speed as a shared parameter that must be kept synchronized manually. The README also calls out this requirement.
 - `block_mover.m` does not contain those dynamic-output comments, but the hard-coded path and `file_path` model are consistent with the matching section in `ibvs_testing.m`.
@@ -164,4 +164,3 @@ For general Webots setup and MATLAB-controller instructions, see the [Webots doc
 ---
 
 This README was created by GitHub Copilot (AI assistant using Copilot SDK in VS Code).
-
