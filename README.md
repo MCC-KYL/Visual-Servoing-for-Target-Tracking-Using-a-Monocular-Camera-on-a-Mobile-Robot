@@ -11,13 +11,12 @@ This folder contains MATLAB controllers for two e-puck robots and a movable targ
 | `tarbot/tarbot.m` | Supervisor | Positions the target above `tarbot` and records `bot` and `target` trajectories. |
 | `block_mover/block_mover.m` | Supervisor | Moves the target in a straight line or square and records `bot` and `target` trajectories. |
 
-The misspelling `trajecotry.m` is intentional in the current files: use that exact filename and controller function name. It is an homage to funnier times in more peaceful environments.
-'tarbot' is the name of both an e-puck and a controller mapping the e-pucks pose to the target. This is because only together can the target move as a bot...a tarbot 
+The misspelling `trajecotry.m` is intentional in the current files: use that exact filename and controller function name.
 
 ## Requirements
 
 - Webots with MATLAB selected as a controller language.
-- MATLAB with the Image Processing Toolbox (`detectHarrisFeatures`, `matchpairs`, `rgb2gray`, and `exportgraphics`).
+- MATLAB with the Computer Vision Toolbox (`detectHarrisFeatures`), Statistics and Machine Learning Toolbox (`matchpairs`), and Image Processing Toolbox (`rgb2gray`). The scripts also use MATLAB functions such as `exportgraphics`.
 - A Webots world containing:
   - a robot or device group named `bot`,
   - a second robot or supervisor named `tarbot`,
@@ -107,9 +106,19 @@ The scripts use `ON = 1` and `OFF = 0` booleans. `ibvs_testing.m` calculates the
 | `norm_e_plot` | Saves the feature-error norm graph. |
 | `plot_loss` | Saves a feature-loss graph. |
 
-Four target corners are initially sorted by position and then tracked with Hungarian matching. The source comments describe dynamic output paths as a possible future improvement. At present, `file_path` is hard-coded and the destination directory must already exist.
+Four target corners are initially detected and sorted by position, then tracked using `matchpairs` to solve a minimum-cost assignment between the previous and current corner locations. The source comments describe dynamic output paths as a possible future improvement. At present, `file_path` is hard-coded and the destination directory must already exist.
 
-During the main loop, Hungarian matching is used to associate detected corners with the previous locations. If fewer than four strong features are available, the controller writes invalid samples and continues until the configured duration is complete. This fallback does not cover the initial capture: the initial Harris detection is inside `if plot_img == ON`, so `plot_img` must remain `ON` or the controller will have no initial `strong` data.
+### Harris corner detection and feature matching
+
+The IBVS controller uses MATLAB's `detectHarrisFeatures` to find Harris-Stephens corners in each grayscale camera image. It selects the four strongest detections with `selectStrongest(4)`, which are expected to correspond to the target's four visible corners. On the initial image, the points are sorted by horizontal and vertical position to assign the `TL`, `TR`, `BL`, and `BR` order used by the controller.
+
+On later images, the controller builds a matrix of Euclidean pixel distances between the previous corner locations and the newly detected locations. It passes this cost matrix and `costUnmatched = 15` to `matchpairs`; the returned assignments associate current detections with the established corner order. The penalty allows the assignment solver to leave points unmatched when that is preferable to a costly pairing. The controller updates its tracked points only when all four detections are available and all four are assigned. If fewer than four strong features are available, it writes invalid samples and continues until the configured duration is complete. This fallback does not cover the initial capture: the initial Harris detection is inside `if plot_img == ON`, so `plot_img` must remain `ON` or the controller will have no initial `strong` data.
+
+References:
+
+- MathWorks, [`detectHarrisFeatures`](https://www.mathworks.com/help/vision/ref/detectharrisfeatures.html) — detects corner features using the Harris-Stephens algorithm.
+- MathWorks, [`matchpairs`](https://www.mathworks.com/help/stats/matchpairs.html) — computes a minimum-cost assignment, with a penalty for unmatched elements.
+- MathWorks, [`rgb2gray`](https://www.mathworks.com/help/images/ref/rgb2gray.html) — converts the camera image to grayscale before feature detection.
 
 ## Outputs
 
